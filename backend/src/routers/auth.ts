@@ -1,0 +1,11 @@
+import { Router } from "express";
+
+import authController from "../controllers/auth.controller";
+
+const authRouter = Router();
+
+authRouter.get("/google", authController.googleOAuth);
+
+authRouter.post("/register", authController.register);
+
+export default authRouter;
