@@ -17,13 +17,13 @@ const Typography = ({ size, color, style, children, ...props }: Props) => {
     <Text
       style={ms(
         styles.defaultStyle,
-        style,
         {
           fontSize: theme.text[size || defaultSize],
         },
         {
           color: theme.color[color || defaultColor],
         },
+        style,
       )}
       {...props}>
       {children}

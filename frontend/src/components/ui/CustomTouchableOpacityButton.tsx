@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 3,
     borderColor: '#333',
-    backgroundColor: '#eeeeee',
+    backgroundColor: '#dedede',
     alignItems: 'center',
     //iOS
     shadowColor: 'black',

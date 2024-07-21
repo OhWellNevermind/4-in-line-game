@@ -1,13 +1,19 @@
 import { theme } from '@/utils/consts/theme';
 import React from 'react';
-import { SafeAreaView, StyleSheet, Text } from 'react-native';
+import { SafeAreaView, StyleSheet } from 'react-native';
 
 type Props = {
   children: React.ReactNode;
+  navigationComponent?: React.ReactNode;
 };
 
-const Layout = ({ children }: Props) => {
-  return <SafeAreaView style={styles.wrapper}>{children}</SafeAreaView>;
+const Layout = ({ children, navigationComponent }: Props) => {
+  return (
+    <>
+      {navigationComponent}
+      <SafeAreaView style={styles.wrapper}>{children}</SafeAreaView>
+    </>
+  );
 };
 
 const styles = StyleSheet.create({
