@@ -33,5 +33,9 @@
     "prisma": "^5.16.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.16.2"
+  },
+  "prettier": {
+    "singleQuote": false,
+    "tabWidth": 2
   }
 }
