@@ -1,9 +1,15 @@
+import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+export type GameModes = 'twoPlayers' | 'online' | 'onlineRoom' | 'offlineBot';
 
 export type RootStackParamList = {
   Home: undefined;
-  Board: undefined;
+  Board: {
+    mode: GameModes;
+  };
   Auth: undefined;
+  GameModes: undefined;
 };
 
 export type HomeScreenNavigationProp = NativeStackNavigationProp<
@@ -16,7 +22,14 @@ export type BoardScreenNavigationProp = NativeStackNavigationProp<
   'Board'
 >;
 
+export type BoardScreenRouteProp = RouteProp<RootStackParamList, 'Board'>;
+
 export type AuthScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Auth'
+>;
+
+export type GameModesScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'GameModes'
 >;

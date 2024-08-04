@@ -17,8 +17,8 @@ const HomeScreen = ({ navigation }: Props) => {
       </View>
       <View style={styles.menu}>
         <CustomTouchableOpacityButton
-          onPress={() => navigation.navigate('Board')}>
-          <Typography>Board</Typography>
+          onPress={() => navigation.navigate('GameModes')}>
+          <Typography>Play</Typography>
         </CustomTouchableOpacityButton>
         <CustomTouchableOpacityButton
           onPress={() => navigation.navigate('Auth')}>

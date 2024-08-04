@@ -1,70 +1,76 @@
+import { PlayerTurn } from '@/logic/GameLogic';
 import {
-  TBoardMode,
-  TCellState,
-  TInitializeBoard,
-  TSetCell,
+  CellState,
+  InitializeBoard,
+  SetCell,
+  SetState,
 } from '@/types/boardTypes';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 type BoardSliceStateType = {
   isInitialized: boolean;
   error: string;
-  mode: TBoardMode;
+  hasWon: boolean;
   rows: number;
   columns: number;
-  board: TCellState[][] | null;
+  board: CellState[][] | null;
+  playerTurn: PlayerTurn;
 };
 
 const initialState: BoardSliceStateType = {
   isInitialized: false,
   error: '',
-  mode: 'headless',
+  hasWon: false,
   rows: 0,
   columns: 0,
   board: null,
+  playerTurn: 'red',
 };
 
 export const boardSlice = createSlice({
   name: 'board',
   initialState,
   reducers: {
-    initialize(state, action: PayloadAction<TInitializeBoard>) {
-      const { mode, rows, columns } = action.payload;
+    initialize(state, action: PayloadAction<InitializeBoard>) {
+      const { rows, columns } = action.payload;
       state.isInitialized = true;
       state.error = '';
-      state.mode = mode;
+      state.hasWon = false;
       state.rows = rows;
       state.columns = columns;
       state.board = Array.from({ length: rows }).map(_ =>
-        Array.from({ length: rows }).map(_ => 'none'),
+        Array.from({ length: columns }).map(_ => 'none'),
       );
     },
+
     destroy(state) {
       state.isInitialized = false;
-      state.mode = 'headless';
+      state.error = '';
+      state.hasWon = false;
       state.rows = 0;
       state.columns = 0;
+      state.board = [];
     },
 
-    // Headless reducers, used for online games with game data coming from server
-
-    setRowAndCell(state, action: PayloadAction<TSetCell>) {
-      if (!state.isInitialized || state.mode !== 'headless') {
-        state.error = 'Not initialized or invalid mode';
-        return;
-      }
+    setRowAndCell(state, action: PayloadAction<SetCell>) {
       const { row, column, type } = action.payload;
-      if (state.rows - 1 < row || state.columns - 1 < column) {
+      if (state.rows <= row || state.columns <= column) {
         state.error = 'Index out of range';
         return;
       }
       state.board![row][column] = type;
+      state.error = '';
     },
 
-    // Managed reducers, used for offline bot games
+    setBoardState(state, action: PayloadAction<SetState>) {
+      state.error = action.payload.error ?? state.error;
+      state.hasWon = action.payload.hasWon ?? state.hasWon;
+      state.playerTurn = action.payload.playerTurn ?? state.playerTurn;
+    },
   },
 });
 
-export const { initialize, destroy, setRowAndCell } = boardSlice.actions;
+export const { initialize, destroy, setRowAndCell, setBoardState } =
+  boardSlice.actions;
 const boardReducer = boardSlice.reducer;
 export default boardReducer;
