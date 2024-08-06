@@ -1,16 +1,21 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
-import authRouter from "./routers/auth";
-import { getGoogleOAuthURL } from "./utils";
 import { createApiResponse } from "./helpers/createApiResponse";
 import { handleError } from "./middlewars/handleError";
+import { isAuthenticated } from "./middlewars/isAuthentificated";
+import { getGoogleOAuthURL } from "./utils/getGoogleOAuthUrl";
+import authRouter from "./routers/auth.router";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use("/auth", authRouter);
+
+console.log(getGoogleOAuthURL());
+
+app.get("/", isAuthenticated, (req, res) => {});
 
 app.use((req, res) => {
   res.status(404).json(
