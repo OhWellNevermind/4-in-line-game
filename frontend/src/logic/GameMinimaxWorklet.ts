@@ -1,4 +1,4 @@
-import { GameLogic, GameLogicState, PlayerTurn } from './GameLogic';
+import { GameLogicState, PlayerTurn } from './GameLogic';
 
 type MoveResult = {
   validMove: boolean;
@@ -18,42 +18,41 @@ type MoveResult = {
   column: number;
 };
 
-export class GameMinimax {
-  private board: number[][] = [];
-  private rows: number = 0;
-  private columns: number = 0;
-  private columnTopSlotIndexes: number[] = [];
-  private currentTurn: number = 1;
-  private static nonePeg = 0;
-  private static redPeg = 1;
-  private static yellowPeg = 2;
-  constructor(gameLogic: GameLogicState) {
-    this.applyGameLogicState(gameLogic);
-  }
+function GameMinimax(gameLogicState: GameLogicState) {
+  'worklet';
+  let board: number[][] = [];
+  let rows: number = 0;
+  let columns: number = 0;
+  let columnTopSlotIndexes: number[] = [];
+  let currentTurn: number = 1;
+  const nonePeg = 0;
+  const redPeg = 1;
+  const yellowPeg = 2;
 
-  applyGameLogicState(gameLogic: GameLogicState) {
-    this.board = gameLogic.board.map(row =>
-      row.map(cell => GameMinimax.getNumberFromColor(cell)),
+  function applyGameLogicState(gameLogic: GameLogicState) {
+    'worklet';
+    board = gameLogic.board.map(row =>
+      row.map(cell => getNumberFromColor(cell)),
     );
-    this.columnTopSlotIndexes = gameLogic.columnTopSlotIndexes.map(el => el);
-    this.rows = gameLogic.rows;
-    this.columns = gameLogic.columns;
-    this.currentTurn = GameMinimax.getNumberFromColor(gameLogic.currentTurn);
+    columnTopSlotIndexes = gameLogic.columnTopSlotIndexes.map(el => el);
+    rows = gameLogic.rows;
+    columns = gameLogic.columns;
+    currentTurn = getNumberFromColor(gameLogic.currentTurn);
   }
 
-  static getNumberFromColor(turnOrCell: PlayerTurn | 'none') {
+  function getNumberFromColor(turnOrCell: PlayerTurn | 'none') {
+    'worklet';
     return turnOrCell === 'none'
-      ? GameMinimax.nonePeg
+      ? nonePeg
       : turnOrCell === 'red'
-      ? GameMinimax.redPeg
-      : GameMinimax.yellowPeg;
+      ? redPeg
+      : yellowPeg;
   }
-  static getOpponentNumber(currentPlayer: number) {
-    return currentPlayer === 1 ? 2 : 1;
-  }
-  getPossibleTurns() {
+
+  function getPossibleMoves() {
+    'worklet';
     const possibleTurns: number[] = [];
-    this.columnTopSlotIndexes.forEach((topIndex, column) => {
+    columnTopSlotIndexes.forEach((topIndex, column) => {
       if (topIndex !== -1) {
         possibleTurns.push(column);
       }
@@ -61,11 +60,9 @@ export class GameMinimax {
     return possibleTurns;
   }
 
-  async getNextMove(isMaximizingPlayer = true, minimaxDepth = 6) {
-    const currentTurn = this.currentTurn;
-    const getPossibleMoves = this.getPossibleTurns.bind(this);
-    const playMove = this.playMove.bind(this);
-    const undoMove = this.undoMove.bind(this);
+  function getNextMove(isMaximizingPlayer = true, minimaxDepth = 6) {
+    'worklet';
+    const actualCurrentTurn = currentTurn;
 
     function minimax(
       moveResult: MoveResult | null = null,
@@ -74,7 +71,9 @@ export class GameMinimax {
       beta = Infinity,
       isMaximizing: boolean,
     ) {
+      'worklet';
       function evaluate(result: MoveResult) {
+        'worklet';
         if (result.hasWon) {
           return 90 + depth;
         }
@@ -96,7 +95,9 @@ export class GameMinimax {
       if ((moveResult && moveResult.hasWon) || depth === 0) {
         const moveEvaluation = evaluate(moveResult!);
         return [
-          moveResult!.player !== currentTurn ? -moveEvaluation : moveEvaluation,
+          moveResult!.player !== actualCurrentTurn
+            ? -moveEvaluation
+            : moveEvaluation,
           moveResult!.column,
         ];
       }
@@ -108,13 +109,13 @@ export class GameMinimax {
       for (const move of possibleMoves) {
         const newMoveRes = playMove(move);
         if (isMaximizing) {
-          const [moveScore] = minimax(
+          const moveScore = minimax(
             newMoveRes,
             depth - 1,
             alpha,
             beta,
             false,
-          );
+          )[0];
           undoMove(move);
           alpha = Math.max(alpha, moveScore);
           if (moveScore > bestScore) {
@@ -125,7 +126,13 @@ export class GameMinimax {
             break;
           }
         } else {
-          const [moveScore] = minimax(newMoveRes, depth - 1, alpha, beta, true);
+          const moveScore = minimax(
+            newMoveRes,
+            depth - 1,
+            alpha,
+            beta,
+            true,
+          )[0];
           undoMove(move);
           if (moveScore < bestScore) {
             bestMove = move;
@@ -140,20 +147,21 @@ export class GameMinimax {
       return [bestScore, bestMove];
     }
     const startTime = Date.now();
-    const [_, bestMove] = minimax(
+    const bestMove = minimax(
       null,
       minimaxDepth,
       -Infinity,
       Infinity,
       isMaximizingPlayer,
-    );
+    )[1];
     console.log(`Found move in ${Date.now() - startTime}`);
     return bestMove;
   }
 
-  playMove(column: number): MoveResult {
-    const placePegRow = this.placePeg(column);
-    const currentPlayer = this.currentTurn;
+  function playMove(column: number): MoveResult {
+    'worklet';
+    const placePegRow = placePeg(column);
+    const currentPlayer = currentTurn;
 
     if (placePegRow === -1) {
       return {
@@ -166,11 +174,8 @@ export class GameMinimax {
       };
     }
 
-    const { hasWon, counters } = this.checkWinFromSource(placePegRow, column);
-    this.currentTurn =
-      this.currentTurn === GameMinimax.yellowPeg
-        ? GameMinimax.redPeg
-        : GameMinimax.yellowPeg;
+    const { hasWon, counters } = checkWinFromSource(placePegRow, column);
+    currentTurn = currentTurn === yellowPeg ? redPeg : yellowPeg;
 
     return {
       validMove: true,
@@ -182,70 +187,52 @@ export class GameMinimax {
     };
   }
 
-  private placePeg(column: number) {
-    if (this.columns <= column || column < 0) {
+  function placePeg(column: number) {
+    'worklet';
+    if (columns <= column || column < 0) {
       return -1;
     }
-    if (this.columnTopSlotIndexes[column] < 0) {
-      return -1;
-    }
-
-    const row = this.columnTopSlotIndexes[column];
-
-    if (this.board[row][column] !== 0) {
+    if (columnTopSlotIndexes[column] < 0) {
       return -1;
     }
 
-    this.board[row][column] = this.currentTurn;
-    this.columnTopSlotIndexes[column]--;
+    const row = columnTopSlotIndexes[column];
+
+    if (board[row][column] !== 0) {
+      return -1;
+    }
+
+    board[row][column] = currentTurn;
+    columnTopSlotIndexes[column]--;
 
     return row;
   }
 
-  undoMove(column: number) {
-    if (this.columns <= column || column < 0) {
+  function undoMove(column: number) {
+    'worklet';
+    if (columns <= column || column < 0) {
       return -1;
     }
-    if (this.columnTopSlotIndexes[column] >= this.rows - 1) {
-      return -1;
-    }
-
-    const row = this.columnTopSlotIndexes[column] + 1;
-
-    if (this.board[row][column] === 0) {
+    if (columnTopSlotIndexes[column] >= rows - 1) {
       return -1;
     }
 
-    this.board[row][column] = 0;
-    this.columnTopSlotIndexes[column]++;
-    this.currentTurn =
-      this.currentTurn === GameMinimax.yellowPeg
-        ? GameMinimax.redPeg
-        : GameMinimax.yellowPeg;
+    const row = columnTopSlotIndexes[column] + 1;
+
+    if (board[row][column] === 0) {
+      return -1;
+    }
+
+    board[row][column] = 0;
+    columnTopSlotIndexes[column]++;
+    currentTurn = currentTurn === yellowPeg ? redPeg : yellowPeg;
 
     return row;
   }
-  printBoard() {
-    this.board.forEach(row => {
-      console.log(
-        row
-          .map(el =>
-            el === GameMinimax.redPeg
-              ? '🟥'
-              : el === GameMinimax.yellowPeg
-              ? '🟨'
-              : '⬛',
-          )
-          .join(''),
-      );
-    });
-  }
-  private boardToKey() {
-    return this.board.map(row => row.join('')).join('');
-  }
 
-  private checkWinFromSource(row: number, column: number) {
-    const currentPeg = this.board[row][column];
+  function checkWinFromSource(row: number, column: number) {
+    'worklet';
+    const currentPeg = board[row][column];
 
     const counters = {
       up: 0,
@@ -275,43 +262,44 @@ export class GameMinimax {
       rows: number,
       columns: number,
     ) {
+      'worklet';
       return !(row < 0 || row >= rows || column < 0 || column >= columns);
     }
 
-    const b = this.board;
+    const b = board;
 
     for (let i = 0; i < 4; i++) {
-      if (inRange(row - i, column, this.rows, this.columns)) {
+      if (inRange(row - i, column, rows, columns)) {
         streak.up = b[row - i][column] === currentPeg && streak.up;
         counters.up += streak.up ? 1 : 0;
       }
-      if (inRange(row + i, column, this.rows, this.columns)) {
+      if (inRange(row + i, column, rows, columns)) {
         streak.down = b[row + i][column] === currentPeg && streak.down;
         counters.down += streak.down ? 1 : 0;
       }
-      if (inRange(row, column - i, this.rows, this.columns)) {
+      if (inRange(row, column - i, rows, columns)) {
         streak.left = b[row][column - i] === currentPeg && streak.left;
         counters.left += streak.left ? 1 : 0;
       }
-      if (inRange(row, column + i, this.rows, this.columns)) {
+      if (inRange(row, column + i, rows, columns)) {
         streak.right = b[row][column + i] === currentPeg && streak.right;
         counters.right += streak.right ? 1 : 0;
       }
-      if (inRange(row - i, column - i, this.rows, this.columns)) {
+      if (inRange(row - i, column - i, rows, columns)) {
         streak.upLeft = b[row - i][column - i] === currentPeg && streak.upLeft;
         counters.upLeft += streak.upLeft ? 1 : 0;
       }
-      if (inRange(row - i, column + i, this.rows, this.columns)) {
+      if (inRange(row - i, column + i, rows, columns)) {
         streak.upRight =
           b[row - i][column + i] === currentPeg && streak.upRight;
         counters.upRight += streak.upRight ? 1 : 0;
       }
-      if (inRange(row + i, column - i, this.rows, this.columns)) {
+      if (inRange(row + i, column - i, rows, columns)) {
         streak.downLeft =
           b[row + i][column - i] === currentPeg && streak.downLeft;
         counters.downLeft += streak.downLeft ? 1 : 0;
       }
-      if (inRange(row + i, column + i, this.rows, this.columns)) {
+      if (inRange(row + i, column + i, rows, columns)) {
         streak.downRight =
           b[row + i][column + i] === currentPeg && streak.downRight;
         counters.downRight += streak.downRight ? 1 : 0;
@@ -328,4 +316,12 @@ export class GameMinimax {
       counters,
     };
   }
+  applyGameLogicState(gameLogicState);
+  return getNextMove();
+}
+
+export function getNextMove(gameLogicState: GameLogicState): number {
+  'worklet';
+  const nextMove = GameMinimax(gameLogicState);
+  return nextMove;
 }

@@ -8,6 +8,14 @@ export type MoveResult = {
   column: number;
 };
 
+export type GameLogicState = {
+  board: (PlayerTurn | 'none')[][];
+  rows: number;
+  columns: number;
+  currentTurn: PlayerTurn;
+  columnTopSlotIndexes: number[];
+};
+
 export class GameLogic {
   private _rows: number;
   private _columns: number;
@@ -180,6 +188,15 @@ export class GameLogic {
     });
   }
 
+  getState(): GameLogicState {
+    return {
+      board: this._board.map(el => el.map(peg => peg)),
+      rows: this._rows,
+      columns: this._columns,
+      currentTurn: this._currentTurn,
+      columnTopSlotIndexes: this._columnTopSlotIndexes,
+    };
+  }
   get rows() {
     return this._rows;
   }
