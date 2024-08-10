@@ -1,6 +1,6 @@
 import axios from "axios";
 import qs from "querystring";
-import { GoogleTokenResult, GoogleUser } from "./types";
+import { GoogleTokenResult, GoogleUser } from "../@types/servicesTypes";
 
 export const getGoogleOAuthTokens = async (
   code: string
@@ -11,7 +11,7 @@ export const getGoogleOAuthTokens = async (
     code,
     client_id: process.env.GOOGLE_CLIENT_ID as string,
     client_secret: process.env.GOOGLE_CLIENT_SECRET as string,
-    redirect_uri: process.env.GOOGLE_OATH_REDIRECT_URL as string,
+    redirect_uri: process.env.GOOGLE_OAUTH_REDIRECT_URL as string,
     grant_type: "authorization_code",
   };
 

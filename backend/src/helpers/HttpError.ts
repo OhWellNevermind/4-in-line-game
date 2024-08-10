@@ -1,4 +1,4 @@
-import { StatusCodes } from "./types";
+import { StatusCodes } from "../@types/helpersType";
 
 export function HttpError(statusCode: StatusCodes, details = {}) {
   const errorMessages = {

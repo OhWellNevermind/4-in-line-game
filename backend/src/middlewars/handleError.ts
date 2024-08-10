@@ -8,6 +8,6 @@ export function handleError(
   next: NextFunction
 ) {
   const { status = 500, message = "Server error", details = {} } = err;
-  console.log(message);
+  console.log(err);
   res.status(status).json(createApiResponse({ message, details }, err));
 }
