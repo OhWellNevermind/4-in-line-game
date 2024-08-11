@@ -1,28 +1,29 @@
-export type PlayerTurn = 'red' | 'yellow';
+export type PlayerColor = 'red' | 'yellow';
 
 export type MoveResult = {
   validMove: boolean;
   hasWon: boolean;
-  player: PlayerTurn;
+  isTie: boolean;
+  player: PlayerColor;
   row: number;
   column: number;
 };
 
 export type GameLogicState = {
-  board: (PlayerTurn | 'none')[][];
+  board: (PlayerColor | 'none')[][];
   rows: number;
   columns: number;
-  currentTurn: PlayerTurn;
+  currentTurn: PlayerColor;
   columnTopSlotIndexes: number[];
 };
 
 export class GameLogic {
   private _rows: number;
   private _columns: number;
-  private _board: (PlayerTurn | 'none')[][];
-  private _currentTurn: PlayerTurn;
+  private _board: (PlayerColor | 'none')[][];
+  private _currentTurn: PlayerColor;
   private _columnTopSlotIndexes: number[];
-  private static firstTurn: PlayerTurn = 'red';
+  private static firstTurn: PlayerColor = 'red';
   public hasWon = false;
 
   constructor(rows: number, columns: number) {
@@ -45,6 +46,7 @@ export class GameLogic {
       return {
         validMove: false,
         hasWon: false,
+        isTie: false,
         player: this._currentTurn,
         row: -1,
         column: -1,
@@ -58,6 +60,7 @@ export class GameLogic {
       return {
         validMove: true,
         hasWon: true,
+        isTie: false,
         player: currentPlayer,
         row: placePegRow,
         column,
@@ -69,6 +72,7 @@ export class GameLogic {
     return {
       validMove: true,
       hasWon: false,
+      isTie: this.isBoardFilled(),
       player: currentPlayer,
       row: placePegRow,
       column,
@@ -93,6 +97,10 @@ export class GameLogic {
     this._columnTopSlotIndexes[column]--;
 
     return row;
+  }
+
+  isBoardFilled() {
+    return this._columnTopSlotIndexes.every(el => el < 0);
   }
 
   checkWinFromSource(row: number, column: number) {
@@ -197,6 +205,7 @@ export class GameLogic {
       columnTopSlotIndexes: this._columnTopSlotIndexes,
     };
   }
+
   get rows() {
     return this._rows;
   }

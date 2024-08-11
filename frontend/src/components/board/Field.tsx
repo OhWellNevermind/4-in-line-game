@@ -1,10 +1,9 @@
 import Peg from '@/components/board/Peg';
-import { destroy } from '@/stores/boardSlice';
 import { RootState } from '@/stores/store';
 import { memoize } from 'proxy-memoize';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 type Props = {
   onPegClick: (row: number, column: number) => void;
@@ -22,7 +21,7 @@ const Field = ({ onPegClick }: Props) => {
   const [boardContainerWidth, setBoardContainerWidth] = useState(0);
   const squareSize = Math.min(boardContainerHeight, boardContainerWidth);
 
-  const gap = 5;
+  const gap = 4;
   const smallerSize = Math.min(boardColumns, boardRows);
 
   let computedBoardWidth = (squareSize / smallerSize) * boardColumns || 1;
@@ -79,16 +78,13 @@ const Field = ({ onPegClick }: Props) => {
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
-    // width: '100%',
     alignSelf: 'stretch',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
   },
   innerContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 5,
   },
   pegsRow: {
     flexDirection: 'row',

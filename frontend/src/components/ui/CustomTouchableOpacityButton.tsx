@@ -1,4 +1,3 @@
-import { ms } from '@/utils/helpers/ms';
 import React from 'react';
 import {
   StyleProp,
@@ -21,7 +20,7 @@ const CustomTouchableOpacityButton = ({
 }: Props) => {
   return (
     <TouchableOpacity
-      style={ms(styles.defaultStyles, style)}
+      style={[styles.defaultStyles, style]}
       onPress={onPress}
       {...props}>
       {children}

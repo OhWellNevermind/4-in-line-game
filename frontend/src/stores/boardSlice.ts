@@ -1,4 +1,4 @@
-import { PlayerTurn } from '@/logic/GameLogic';
+import { PlayerColor } from '@/logic/GameLogic';
 import {
   CellState,
   InitializeBoard,
@@ -9,22 +9,26 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 type BoardSliceStateType = {
   isInitialized: boolean;
-  error: string;
+  isTie: boolean;
   hasWon: boolean;
+  error: string;
   rows: number;
   columns: number;
   board: CellState[][] | null;
-  playerTurn: PlayerTurn;
+  playerTurn: PlayerColor;
+  currentPlayerColor: PlayerColor;
 };
 
 const initialState: BoardSliceStateType = {
   isInitialized: false,
-  error: '',
+  isTie: false,
   hasWon: false,
+  error: '',
   rows: 0,
   columns: 0,
   board: null,
   playerTurn: 'red',
+  currentPlayerColor: 'red',
 };
 
 export const boardSlice = createSlice({
@@ -41,6 +45,9 @@ export const boardSlice = createSlice({
       state.board = Array.from({ length: rows }).map(_ =>
         Array.from({ length: columns }).map(_ => 'none'),
       );
+      state.isTie = false;
+      state.playerTurn = action.payload.playerTurn;
+      state.currentPlayerColor = action.payload.currentPlayerColor;
     },
 
     destroy(state) {
@@ -63,14 +70,23 @@ export const boardSlice = createSlice({
     },
 
     setBoardState(state, action: PayloadAction<SetState>) {
-      state.error = action.payload.error ?? state.error;
+      state.isTie = action.payload.isTie ?? state.isTie;
       state.hasWon = action.payload.hasWon ?? state.hasWon;
+      state.error = action.payload.error ?? state.error;
       state.playerTurn = action.payload.playerTurn ?? state.playerTurn;
+    },
+    changeCurrentTurn(state) {
+      state.playerTurn = state.playerTurn === 'red' ? 'yellow' : 'red';
     },
   },
 });
 
-export const { initialize, destroy, setRowAndCell, setBoardState } =
-  boardSlice.actions;
+export const {
+  initialize,
+  destroy,
+  setRowAndCell,
+  setBoardState,
+  changeCurrentTurn,
+} = boardSlice.actions;
 const boardReducer = boardSlice.reducer;
 export default boardReducer;

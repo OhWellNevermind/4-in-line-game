@@ -1,11 +1,12 @@
-import { PlayerTurn } from '@/logic/GameLogic';
+import { PlayerColor } from '@/logic/GameLogic';
 
-export type GameMode = 'pvp' | 'bot' | 'idle';
 export type CellState = 'red' | 'yellow' | 'none';
 
 export type InitializeBoard = {
   rows: number;
   columns: number;
+  playerTurn: PlayerColor;
+  currentPlayerColor: PlayerColor;
 };
 
 export type SetCell = {
@@ -17,7 +18,8 @@ export type SetCell = {
 export type SetState = {
   hasWon?: boolean;
   error?: string;
-  playerTurn?: PlayerTurn;
+  playerTurn?: PlayerColor;
+  isTie?: boolean;
 };
 
 export type SetError = {

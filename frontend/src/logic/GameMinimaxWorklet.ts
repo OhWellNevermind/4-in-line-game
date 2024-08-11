@@ -1,4 +1,4 @@
-import { GameLogicState, PlayerTurn } from './GameLogic';
+import { GameLogicState, PlayerColor } from './GameLogic';
 
 type MoveResult = {
   validMove: boolean;
@@ -18,7 +18,10 @@ type MoveResult = {
   column: number;
 };
 
-function GameMinimax(gameLogicState: GameLogicState) {
+function GameMinimax(
+  gameLogicState: GameLogicState,
+  options: { depth: number },
+) {
   'worklet';
   let board: number[][] = [];
   let rows: number = 0;
@@ -40,7 +43,7 @@ function GameMinimax(gameLogicState: GameLogicState) {
     currentTurn = getNumberFromColor(gameLogic.currentTurn);
   }
 
-  function getNumberFromColor(turnOrCell: PlayerTurn | 'none') {
+  function getNumberFromColor(turnOrCell: PlayerColor | 'none') {
     'worklet';
     return turnOrCell === 'none'
       ? nonePeg
@@ -317,11 +320,11 @@ function GameMinimax(gameLogicState: GameLogicState) {
     };
   }
   applyGameLogicState(gameLogicState);
-  return getNextMove();
+  return getNextMove(true, options.depth);
 }
 
-export function getNextMove(gameLogicState: GameLogicState): number {
+export function getNextMove(gameLogicState: GameLogicState, depth = 6): number {
   'worklet';
-  const nextMove = GameMinimax(gameLogicState);
+  const nextMove = GameMinimax(gameLogicState, { depth });
   return nextMove;
 }

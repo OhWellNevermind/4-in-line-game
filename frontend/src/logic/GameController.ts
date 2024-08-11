@@ -1,16 +1,20 @@
-import { MoveResult } from '@/logic/GameLogic';
+import { MoveResult, PlayerColor } from '@/logic/GameLogic';
 import EventEmitter, {
   EmitterSubscription,
 } from 'react-native/Libraries/vendor/emitter/EventEmitter';
 
 export type GameControllerEvents = {
   playMove: (column: number) => void;
-  onMovePlayed: (moveResult: MoveResult) => void;
+  onMovePlayed: (moveResult: MoveResult) => void; // Move played by any player, bot or remote player
+  onCurrentPlayerMovePlayed: () => void; // Move played by player
+  onOpponentPlayerMovePlayed: () => void; // Move played by bot or remote player
+  onGameStarted: (gameState: { startingPlayerColor: PlayerColor }) => void;
 };
 
 export class GameController<TContext, TInputContext> extends EventEmitter {
   private _isInitialized = false;
   private _context: TContext | null = null;
+  private _id: string;
   constructor(
     private controllerCreator: (
       gameController: GameController<TContext, TInputContext>,
@@ -18,17 +22,22 @@ export class GameController<TContext, TInputContext> extends EventEmitter {
     ) => TContext,
   ) {
     super();
+    this._id = Math.floor(Math.random() * 100000000).toString();
   }
 
   initialize(
-    eventHandlers: GameControllerEvents,
+    eventHandlers: Partial<GameControllerEvents>,
     inputContext: TInputContext,
   ): GameController<TContext, TInputContext> {
     this.removeAllListeners();
     this._context = this.controllerCreator(this, inputContext);
 
-    this.addListener('playMove', eventHandlers.playMove);
-    this.addListener('onMovePlayed', eventHandlers.onMovePlayed);
+    for (const key of Object.keys(eventHandlers)) {
+      const typedKey = key as keyof GameControllerEvents;
+      if (typeof eventHandlers[typedKey] === 'function') {
+        this.addListener(typedKey, eventHandlers[typedKey]);
+      }
+    }
     return this;
   }
 
@@ -38,7 +47,7 @@ export class GameController<TContext, TInputContext> extends EventEmitter {
     context?: any,
   ): EmitterSubscription {
     return super.addListener(
-      eventType,
+      eventType + this._id,
       listener,
       context,
     ) as EmitterSubscription;
@@ -47,7 +56,7 @@ export class GameController<TContext, TInputContext> extends EventEmitter {
     eventType: TEvent,
     ...params: Parameters<GameControllerEvents[TEvent]>
   ) {
-    super.emit(eventType, ...params);
+    super.emit(eventType + this._id, ...params);
   }
 
   playMove(column: number) {
