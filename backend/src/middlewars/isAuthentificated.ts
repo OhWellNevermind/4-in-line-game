@@ -6,13 +6,17 @@ import { asyncErrorHandler } from "../utils/asyncErrorHandler";
 
 const { JWT_SECRET } = process.env;
 
-export const isAuthenticated = asyncErrorHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.header("authorization")?.split("Bearer ")[1];
-    if (!token) {
-      return next(HttpError(401));
-    }
+export const isAuthenticated = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const token = req.header("authorization")?.split("Bearer ")[1];
+  if (!token) {
+    return next(HttpError(401));
+  }
 
+  try {
     const { id } = jwt.verify(token, JWT_SECRET as string) as User;
 
     if (!id) {
@@ -20,6 +24,9 @@ export const isAuthenticated = asyncErrorHandler(
     }
 
     req.user = { id };
-    next();
+  } catch (error) {
+    return next(HttpError(401));
   }
-);
+
+  next();
+};

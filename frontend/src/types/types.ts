@@ -5,6 +5,8 @@ export type GameModes = 'twoPlayers' | 'online' | 'onlineRoom' | 'offlineBot';
 
 export type RootStackParamList = {
   Home: undefined;
+  Login: undefined;
+  Register: undefined;
   Board: {
     mode: GameModes;
   };
@@ -26,9 +28,10 @@ export type BoardScreenRouteProp = RouteProp<RootStackParamList, 'Board'>;
 
 export type AuthScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
-  'Auth'
+  'Login'
 >;
 
+export type AsyncStorageKeys = 'token' | 'refreshToken';
 export type GameModesScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'GameModes'
