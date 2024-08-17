@@ -3,7 +3,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 export type RootStackParamList = {
   Home: undefined;
   Board: undefined;
-  Auth: undefined;
+  Login: undefined;
+  Register: undefined;
 };
 
 export type HomeScreenNavigationProp = NativeStackNavigationProp<
@@ -18,5 +19,7 @@ export type BoardScreenNavigationProp = NativeStackNavigationProp<
 
 export type AuthScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
-  'Auth'
+  'Login'
 >;
+
+export type AsyncStorageKeys = 'token' | 'refreshToken';

@@ -1,10 +1,10 @@
 import CustomTextInput from '@/components/ui/CustomInput';
 import CustomTouchableOpacityButton from '@/components/ui/CustomTouchableOpacityButton';
 import Typography from '@/components/ui/Typography';
-import { useLoginMutation } from '@/services/authApi';
-import { TLoginDTO } from '@/types/dtos';
+import { useRegisterMutation } from '@/services/authApi';
+import { TRegisterDTO } from '@/types/dtos';
 import { AuthScreenNavigationProp } from '@/types/types';
-import loginSchema from '@/utils/validation/loginSchema';
+import registerSchema from '@/utils/validation/registerSchema';
 import { yupResolver } from '@hookform/resolvers/yup';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -14,25 +14,37 @@ type Props = {
   navigation: AuthScreenNavigationProp;
 };
 
-const LoginForm = ({ navigation }: Props) => {
+const RegisterForm = ({ navigation }: Props) => {
+  const [register] = useRegisterMutation();
+
   const {
     control,
     handleSubmit,
     formState: { errors },
-    clearErrors,
-  } = useForm<TLoginDTO>({
-    resolver: yupResolver(loginSchema),
+  } = useForm<TRegisterDTO>({
+    resolver: yupResolver(registerSchema),
   });
 
-  const [login] = useLoginMutation();
-
-  const onSubmit = async (data: TLoginDTO) => {
-    await login(data);
-    // navigation.navigate('Home');
+  const onSubmit = async (data: TRegisterDTO) => {
+    await register(data);
+    navigation.navigate('Home');
   };
 
   return (
     <View style={styles.view}>
+      <Controller
+        control={control}
+        name="username"
+        render={({ field }) => (
+          <CustomTextInput
+            label="User name"
+            onChangeText={field.onChange}
+            value={field.value}
+            placeholder="User name"
+            error={errors.username?.message}
+          />
+        )}
+      />
       <Controller
         control={control}
         name="email"
@@ -59,14 +71,8 @@ const LoginForm = ({ navigation }: Props) => {
           />
         )}
       />
+
       <CustomTouchableOpacityButton onPress={handleSubmit(onSubmit)}>
-        <Typography>Login</Typography>
-      </CustomTouchableOpacityButton>
-      <CustomTouchableOpacityButton
-        onPress={() => {
-          clearErrors();
-          navigation.navigate('Register');
-        }}>
         <Typography>Register</Typography>
       </CustomTouchableOpacityButton>
     </View>
@@ -78,4 +84,4 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 });
-export default LoginForm;
+export default RegisterForm;

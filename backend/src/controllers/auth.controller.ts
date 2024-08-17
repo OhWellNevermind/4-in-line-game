@@ -5,12 +5,14 @@ import bcrypt from "bcrypt";
 import prisma from "../prisma-client";
 import { HttpError } from "../helpers/HttpError";
 import { createApiResponse } from "../helpers/createApiResponse";
+import { User } from "@prisma/client";
 
 const oneHourInMs = 60 * 60 * 1000;
 const JWT_SECRET = process.env.JWT_SECRET;
-console.log(process.env.SALT_ROUNDS);
+const REFRESH_JWT_SECRET = process.env.REFRESH_JWT_SECRET as string;
 const SALT_ROUNDS = +(process.env.SALT_ROUNDS || 0);
 const expiresIn = `${oneHourInMs / oneHourInMs}h`;
+const refreshExpiresIn = "14d";
 
 const googleOAuth = async (req: Request, res: Response, next: NextFunction) => {
   const code = req.query.code as string;
@@ -62,7 +64,6 @@ const googleOAuth = async (req: Request, res: Response, next: NextFunction) => {
 
 const register = async (req: Request, res: Response, next: NextFunction) => {
   const { username, email, password } = req.body;
-
   const user = await prisma.user.findUnique({
     where: { email },
   });
@@ -85,11 +86,15 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     id: newUser.id,
   };
   const token = jwt.sign(payload, JWT_SECRET as string, { expiresIn });
+  const refreshToken = jwt.sign(payload, REFRESH_JWT_SECRET, {
+    expiresIn: refreshExpiresIn,
+  });
 
   return res.json(
     createApiResponse({
       user: { username: newUser.name, id: newUser.id },
       token,
+      refreshToken,
     })
   );
 };
@@ -107,7 +112,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
   const hashPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-  if (user.password !== hashPassword) {
+  if (!(await bcrypt.compare(password, user.password))) {
     throw HttpError(400, { message: "Email or password is incorerct" });
   }
 
@@ -115,11 +120,48 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     id: user.id,
   };
   const token = jwt.sign(payload, JWT_SECRET as string, { expiresIn });
+  const refreshToken = jwt.sign(payload, REFRESH_JWT_SECRET, {
+    expiresIn: refreshExpiresIn,
+  });
 
   return res.json(
     createApiResponse({
-      user: { username: user.name, id: user.id },
+      user: { name: user.name, id: user.id },
       token,
+      refreshToken,
+    })
+  );
+};
+
+const refreshToken = async (req: Request, res: Response) => {
+  const { refreshToken } = req.body;
+
+  const { id } = jwt.verify(refreshToken, REFRESH_JWT_SECRET) as User;
+  if (!id) {
+    throw HttpError(401, { message: "Refresh token is expired" });
+  }
+
+  const token = jwt.sign({ id }, JWT_SECRET as string, { expiresIn });
+
+  return res.json(
+    createApiResponse({
+      token,
+    })
+  );
+};
+
+const getMe = async (req: Request, res: Response) => {
+  const userFromToken = req.user;
+
+  const user = await prisma.user.findFirst({
+    where: {
+      id: userFromToken!.id,
+    },
+  });
+
+  return res.json(
+    createApiResponse({
+      user,
     })
   );
 };
@@ -128,4 +170,6 @@ export default {
   googleOAuth,
   register,
   login,
+  refreshToken,
+  getMe,
 };

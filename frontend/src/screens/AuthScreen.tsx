@@ -2,7 +2,6 @@ import React from 'react';
 import { AuthScreenNavigationProp } from '@/types/types';
 import Layout from '@/screens/Layout';
 import LoginForm from '@/components/forms/LoginForm';
-import { StyleSheet } from 'react-native';
 import NavigationBar from '@/components/ui/NavigationBar';
 
 type Props = {
@@ -20,10 +19,9 @@ const AuthScreen = ({ navigation }: Props) => {
           }}
         />
       }>
-      <LoginForm />
+      <LoginForm navigation={navigation} />
     </Layout>
   );
 };
 
-const styles = StyleSheet.create({});
 export default AuthScreen;
