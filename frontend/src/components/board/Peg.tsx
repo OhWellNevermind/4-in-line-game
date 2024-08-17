@@ -1,44 +1,30 @@
 import { setRowAndCell } from '@/stores/boardSlice';
 import { RootState } from '@/stores/store';
-import { TCellState } from '@/types/boardTypes';
-import { memoize } from 'proxy-memoize';
-import React, { useState } from 'react';
+import { CellState } from '@/types/boardTypes';
+import { theme } from '@/utils/consts/theme';
+import React from 'react';
 import { StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 type Props = {
   column: number;
   row: number;
+  onClick: () => void;
 };
 
-const pegColors: { [key in TCellState]: string } = {
+const pegColors: { [key in CellState]: string } = {
   none: '#aaa',
-  red: 'red',
-  yellow: 'yellow',
+  red: theme.color.red_peg,
+  yellow: theme.color.yellow_peg,
 };
-const Peg = ({ column, row }: Props) => {
+
+const Peg = ({ column, row, onClick }: Props) => {
   const cellState = useSelector(
     (state: RootState) => state.board.board?.[row]?.[column],
   );
-  const dispatch = useDispatch();
 
-  console.log('render', column, row);
   return (
-    <TouchableWithoutFeedback
-      onPress={() => {
-        dispatch(
-          setRowAndCell({
-            column,
-            row,
-            type:
-              cellState === 'none'
-                ? 'red'
-                : cellState === 'red'
-                ? 'yellow'
-                : 'none',
-          }),
-        );
-      }}>
+    <TouchableWithoutFeedback onPress={() => onClick()}>
       <View
         style={{
           backgroundColor: pegColors[cellState || 'none'],

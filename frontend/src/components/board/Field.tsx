@@ -1,14 +1,15 @@
 import Peg from '@/components/board/Peg';
-import CustomTouchableOpacityButton from '@/components/ui/CustomTouchableOpacityButton';
-import Typography from '@/components/ui/Typography';
-import { destroy, initialize } from '@/stores/boardSlice';
 import { RootState } from '@/stores/store';
 import { memoize } from 'proxy-memoize';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
-const Field = () => {
+type Props = {
+  onPegClick: (row: number, column: number) => void;
+};
+
+const Field = ({ onPegClick }: Props) => {
   const { isInitialized, boardRows, boardColumns } = useSelector(
     memoize((state: RootState) => ({
       isInitialized: state.board.isInitialized,
@@ -16,12 +17,11 @@ const Field = () => {
       boardColumns: state.board.columns,
     })),
   );
-  const dispatch = useDispatch();
   const [boardContainerHeight, setBoardContainerHeight] = useState(0);
   const [boardContainerWidth, setBoardContainerWidth] = useState(0);
   const squareSize = Math.min(boardContainerHeight, boardContainerWidth);
 
-  const gap = 5;
+  const gap = 4;
   const smallerSize = Math.min(boardColumns, boardRows);
 
   let computedBoardWidth = (squareSize / smallerSize) * boardColumns || 1;
@@ -34,12 +34,6 @@ const Field = () => {
 
   computedBoardWidth *= scaleFactor;
   computedBoardHeight *= scaleFactor;
-
-  useEffect(() => {
-    return () => {
-      dispatch(destroy());
-    };
-  }, []);
 
   return (
     <>
@@ -63,7 +57,12 @@ const Field = () => {
                 <View key={rowI} style={{ gap, ...styles.pegsRow }}>
                   {Array.from({ length: boardColumns }).map(
                     (cellState, colI) => (
-                      <Peg key={colI} column={colI} row={rowI} />
+                      <Peg
+                        key={colI}
+                        column={colI}
+                        row={rowI}
+                        onClick={() => onPegClick(rowI, colI)}
+                      />
                     ),
                   )}
                 </View>
@@ -72,17 +71,6 @@ const Field = () => {
           </View>
         )}
       </View>
-      <CustomTouchableOpacityButton
-        onPress={() => {
-          const rows = 7;
-          const columns = 6;
-          dispatch(initialize({ rows, columns, mode: 'headless' }));
-        }}
-        style={{
-          marginVertical: 10,
-        }}>
-        <Typography>Rebuild</Typography>
-      </CustomTouchableOpacityButton>
     </>
   );
 };
@@ -90,16 +78,13 @@ const Field = () => {
 const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
-    // width: '100%',
     alignSelf: 'stretch',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
   },
   innerContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 5,
   },
   pegsRow: {
     flexDirection: 'row',

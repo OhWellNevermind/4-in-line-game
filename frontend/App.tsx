@@ -4,6 +4,8 @@ import { store } from '@/stores/store';
 import setup from '@/services/setupInterceptors';
 import RootNavigator from '@/components/navigation/RootNavigator';
 
+
+
 const App = () => {
   return (
     <Provider store={store}>

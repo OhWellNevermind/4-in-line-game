@@ -1,6 +1,5 @@
 import Typography from '@/components/ui/Typography';
 import { theme } from '@/utils/consts/theme';
-import { ms } from '@/utils/helpers/ms';
 import React from 'react';
 import {
   StyleProp,
@@ -21,17 +20,15 @@ type Props = {
 
 const NavigationBar = ({ style, title, onBack }: Props) => {
   return (
-    <View style={ms(styles.defaultViewStyles, style?.bar)}>
+    <View style={[styles.defaultViewStyles, style?.bar]}>
       <Typography
         size="lg"
-        style={ms(styles.defaultTitleStyles, style?.title)}
+        style={[styles.defaultTitleStyles, style?.title]}
         onPress={onBack}>
         ←
       </Typography>
       {title && (
-        <Typography
-          size="lg"
-          style={ms(styles.defaultTitleStyles, style?.title)}>
+        <Typography size="lg" style={[styles.defaultTitleStyles, style?.title]}>
           {title}
         </Typography>
       )}

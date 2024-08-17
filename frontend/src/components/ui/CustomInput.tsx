@@ -1,7 +1,6 @@
 import ErrorMessage from '@/components/ui/ErrorMessage';
 import Typography from '@/components/ui/Typography';
 import { theme } from '@/utils/consts/theme';
-import { ms } from '@/utils/helpers/ms';
 import React from 'react';
 import {
   StyleProp,
@@ -23,17 +22,17 @@ type Props = {
 } & TextInputProps;
 const CustomTextInput = ({ error, label, style, ...props }: Props) => {
   return (
-    <View style={ms(styles.defaultContainerStyles, style?.container)}>
-      <Typography style={ms(styles.defaultLabelStyles, style?.label)}>
+    <View style={[styles.defaultContainerStyles, style?.container]}>
+      <Typography style={[styles.defaultLabelStyles, style?.label]}>
         {label}
       </Typography>
       <TextInput
         placeholderTextColor={theme.color.text_gray_medium}
-        style={ms(
+        style={[
           styles.defaultInputStyles,
-          { marginBottom: error ? 2 : 17 },
+          error ? styles.errorInputStyles : {},
           style?.input,
-        )}
+        ]}
         {...props}
       />
       {error && <ErrorMessage>{error}</ErrorMessage>}
@@ -53,6 +52,10 @@ const styles = StyleSheet.create({
     fontFamily: 'HermeneusOne-Regular',
     margin: 0,
     marginTop: 8,
+    marginBottom: 17,
+  },
+  errorInputStyles: {
+    marginBottom: 2,
   },
   defaultLabelStyles: {
     color: '#fff',

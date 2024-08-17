@@ -44,6 +44,10 @@ const HomeScreen = ({ navigation }: Props) => {
               <Typography>Board</Typography>
             </CustomTouchableOpacityButton>
             <CustomTouchableOpacityButton
+              onPress={() => navigation.navigate('GameModes')}>
+              <Typography>Play</Typography>
+            </CustomTouchableOpacityButton>
+            <CustomTouchableOpacityButton
               onPress={async () => {
                 dispatch(refreshState());
                 await clearTokens();

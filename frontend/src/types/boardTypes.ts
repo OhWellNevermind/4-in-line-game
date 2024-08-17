@@ -1,15 +1,27 @@
-export type TGameMode = 'pvp' | 'bot' | 'idle';
-export type TBoardMode = 'headless' | 'managed';
-export type TCellState = 'red' | 'yellow' | 'none';
+import { PlayerColor } from '@/logic/GameLogic';
 
-export type TInitializeBoard = {
+export type CellState = 'red' | 'yellow' | 'none';
+
+export type InitializeBoard = {
   rows: number;
   columns: number;
-  mode: TBoardMode;
+  playerTurn: PlayerColor;
+  currentPlayerColor: PlayerColor;
 };
 
-export type TSetCell = {
+export type SetCell = {
   row: number;
   column: number;
-  type: TCellState;
+  type: CellState;
+};
+
+export type SetState = {
+  hasWon?: boolean;
+  error?: string;
+  playerTurn?: PlayerColor;
+  isTie?: boolean;
+};
+
+export type SetError = {
+  error: string;
 };

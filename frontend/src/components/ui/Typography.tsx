@@ -2,7 +2,6 @@ import React from 'react';
 import { StyleSheet, Text, TextProps } from 'react-native';
 
 import { theme } from '@/utils/consts/theme';
-import { ms } from '@/utils/helpers/ms';
 
 type Props = {
   size?: keyof typeof theme.text;
@@ -15,7 +14,7 @@ const Typography = ({ size, color, style, children, ...props }: Props) => {
   const defaultColor = 'text_black';
   return (
     <Text
-      style={ms(
+      style={[
         styles.defaultStyle,
         {
           fontSize: theme.text[size || defaultSize],
@@ -24,7 +23,7 @@ const Typography = ({ size, color, style, children, ...props }: Props) => {
           color: theme.color[color || defaultColor],
         },
         style,
-      )}
+      ]}
       {...props}>
       {children}
     </Text>

@@ -12,5 +12,7 @@ export const theme = {
     text_black: '#111',
     text_gray_medium: '#777',
     error: '#FF4444',
+    yellow_peg: '#FFF730',
+    red_peg: '#FF3D30',
   },
 };
